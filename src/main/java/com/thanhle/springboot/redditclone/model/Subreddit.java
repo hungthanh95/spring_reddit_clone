@@ -10,7 +10,7 @@ import java.util.List;
 public class Subreddit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long subredditId;
     @NotBlank(message = "Community name is required")
     private String name;
     @NotBlank(message = "Description is required")
@@ -21,12 +21,12 @@ public class Subreddit {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    public Long getId() {
-        return id;
+    public Long getSubredditId() {
+        return subredditId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setSubredditId(Long subredditId) {
+        this.subredditId = subredditId;
     }
 
     public String getName() {

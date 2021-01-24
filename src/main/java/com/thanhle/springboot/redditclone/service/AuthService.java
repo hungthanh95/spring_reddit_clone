@@ -3,6 +3,7 @@ package com.thanhle.springboot.redditclone.service;
 import com.thanhle.springboot.redditclone.dto.request.LoginRequest;
 import com.thanhle.springboot.redditclone.dto.request.RegisterRequest;
 import com.thanhle.springboot.redditclone.dto.response.AuthenticationResponse;
+import com.thanhle.springboot.redditclone.exception.ResourceNotFound;
 import com.thanhle.springboot.redditclone.exception.SpringRedditException;
 import com.thanhle.springboot.redditclone.model.NotificationEmail;
 import com.thanhle.springboot.redditclone.model.User;
@@ -95,6 +96,15 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String authToken = jwtProvider.generateToken(authentication);
         return new AuthenticationResponse(authToken, loginRequest.getUsername());
+    }
+
+    @Transactional(readOnly = true)
+    public User getCurrentUser() {
+        org.springframework.security.core.userdetails.User principal =
+                (org.springframework.security.core.userdetails.User) SecurityContextHolder
+                                                                    .getContext().getAuthentication()
+                                                                    .getPrincipal();
+        return userRepository.findByUsername(principal.getUsername()).orElseThrow(() -> new ResourceNotFound(User.class + " not found with username" + principal.getUsername()));
     }
 
 }

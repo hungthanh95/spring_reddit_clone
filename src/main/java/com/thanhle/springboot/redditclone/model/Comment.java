@@ -20,6 +20,10 @@ public class Comment {
     @JoinColumn(name = "userId", referencedColumnName = "userId")
     private User user;
 
+    @PrePersist
+    void prePersist() {
+        this.setCreatedDate(Instant.now());
+    }
     public Long getId() {
         return id;
     }

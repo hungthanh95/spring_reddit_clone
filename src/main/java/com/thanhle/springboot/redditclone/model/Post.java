@@ -1,5 +1,6 @@
 package com.thanhle.springboot.redditclone.model;
 
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
@@ -18,6 +19,7 @@ public class Post {
     private String url;
     @Nullable
     private String description;
+    @Column(columnDefinition = "integer default 0")
     private Integer voteCount;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId", referencedColumnName = "userId")
@@ -91,5 +93,10 @@ public class Post {
 
     public void setSubreddit(Subreddit subreddit) {
         this.subreddit = subreddit;
+    }
+
+    @PrePersist
+    void prePersist() {
+        this.setCreatedDate(Instant.now());
     }
 }

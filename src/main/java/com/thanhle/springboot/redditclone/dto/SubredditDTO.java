@@ -1,17 +1,17 @@
 package com.thanhle.springboot.redditclone.dto;
 
 public class SubredditDTO {
-    private Long id;
+    private Long subredditId;
     private String name;
     private String description;
     private Integer postCount;
 
-    public Long getId() {
-        return id;
+    public Long getSubredditId() {
+        return subredditId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setSubredditId(Long subredditId) {
+        this.subredditId = subredditId;
     }
 
     public String getName() {

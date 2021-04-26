@@ -1,6 +1,7 @@
 package com.thanhle.springboot.redditclone.service;
 
 import com.thanhle.springboot.redditclone.dto.request.LoginRequest;
+import com.thanhle.springboot.redditclone.dto.request.RefreshTokenRequest;
 import com.thanhle.springboot.redditclone.dto.request.RegisterRequest;
 import com.thanhle.springboot.redditclone.dto.response.AuthenticationResponse;
 import com.thanhle.springboot.redditclone.exception.ResourceNotFound;
@@ -33,16 +34,18 @@ public class AuthService {
     private final UserRepository userRepository;
     private final VerificationTokenRepository tokenRepository;
     private final MailService mailService;
+    private final RefreshTokenService refreshTokenService;
     private final MailContentBuilder mailContentBuilder;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
 
-    public AuthService(UserRepository userRepository, VerificationTokenRepository tokenRepository, MailService mailService, MailContentBuilder mailContentBuilder, UserMapper userMapper, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtProvider jwtProvider) {
+    public AuthService(UserRepository userRepository, VerificationTokenRepository tokenRepository, MailService mailService, RefreshTokenService refreshTokenService, MailContentBuilder mailContentBuilder, UserMapper userMapper, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtProvider jwtProvider) {
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
         this.mailService = mailService;
+        this.refreshTokenService = refreshTokenService;
         this.mailContentBuilder = mailContentBuilder;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
@@ -95,7 +98,19 @@ public class AuthService {
                 .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String authToken = jwtProvider.generateToken(authentication);
-        return new AuthenticationResponse(authToken, loginRequest.getUsername());
+        return new AuthenticationResponse(authToken,
+                                          refreshTokenService.generateRefreshToken().getToken(),
+                                          Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()),
+                                          loginRequest.getUsername());
+    }
+
+    public AuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
+        refreshTokenService.validateRefreshToken(refreshTokenRequest.getRefreshToken());
+        String token = jwtProvider.generateTokenWithUserName(refreshTokenRequest.getUsername());
+        return new AuthenticationResponse(token,
+                                          refreshTokenRequest.getRefreshToken(),
+                                          Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()),
+                                          refreshTokenRequest.getUsername());
     }
 
     @Transactional(readOnly = true)

@@ -11,8 +11,6 @@ public class Vote {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long voteId;
-
-    @Enumerated(EnumType.STRING)
     private VoteType voteType;
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
